@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import OpenAI from "openai";
 
 dotenv.config();
 
@@ -9,54 +8,45 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// OpenAI setup (SAFE: uses Render env variable)
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Health check route
+// Health check
 app.get("/", (req, res) => {
-  res.send("AI Backend is running 🚀");
+  res.send("HuggingFace AI Backend is running 🚀");
 });
 
 // Chat route
 app.post("/chat", async (req, res) => {
   const message = req.body.message;
 
-  if (!message) {
-    return res.status(400).json({ reply: "No message provided" });
-  }
+  if (!message) return res.status(400).json({ reply: "No message provided" });
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "You are a helpful AI assistant like ChatGPT."
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/google/flan-t5-large",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.HF_TOKEN}`,
+          "Content-Type": "application/json"
         },
-        {
-          role: "user",
-          content: message
-        }
-      ]
-    });
+        body: JSON.stringify({ inputs: message })
+      }
+    );
 
-    const reply = response.choices?.[0]?.message?.content;
+    const data = await response.json();
+
+    // extract generated text
+    const reply =
+      data?.[0]?.generated_text ||
+      data?.generated_text ||
+      "AI could not respond";
 
     res.json({ reply });
 
   } catch (err) {
-    console.log("OPENAI ERROR:", err);
-
-    res.status(500).json({
-      reply: "AI error: check API key or server logs"
-    });
+    console.log("HuggingFace ERROR:", err);
+    res.status(500).json({ reply: "AI error (HuggingFace failed)" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+app.listen(PORT, () => console.log("HF AI running on port " + PORT));
