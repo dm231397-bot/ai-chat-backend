@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Health check
 app.get("/", (req, res) => {
-  res.send("HuggingFace AI Backend is running 🚀");
+  res.send("HuggingFace Free AI Backend is running 🚀");
 });
 
 // Chat route
@@ -20,8 +20,9 @@ app.post("/chat", async (req, res) => {
   if (!message) return res.status(400).json({ reply: "No message provided" });
 
   try {
+    // Call Hugging Face API (distilgpt2)
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-large",
+      "https://api-inference.huggingface.co/models/distilgpt2",
       {
         method: "POST",
         headers: {
@@ -34,7 +35,7 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    // extract generated text
+    // distilgpt2 returns array or object
     const reply =
       data?.[0]?.generated_text ||
       data?.generated_text ||
@@ -49,4 +50,4 @@ app.post("/chat", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("HF AI running on port " + PORT));
+app.listen(PORT, () => console.log("HF Free AI running on port " + PORT));
