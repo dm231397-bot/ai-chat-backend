@@ -1,3 +1,12 @@
+import express from "express";
+import cors from "cors";
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// CHAT ROUTE
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
@@ -28,7 +37,6 @@ app.post("/chat", async (req, res) => {
       });
     }
 
-    // If model still loading
     if (data.error) {
       return res.json({
         reply: "⏳ Model loading... try again in 10 seconds"
@@ -43,4 +51,11 @@ app.post("/chat", async (req, res) => {
     console.error(err);
     res.json({ reply: "❌ Backend error" });
   }
+});
+
+// START SERVER
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 });
