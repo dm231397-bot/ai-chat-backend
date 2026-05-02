@@ -3,30 +3,39 @@ app.post("/chat", async (req, res) => {
     const userMessage = req.body.message;
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1",
+      "https://api-inference.huggingface.co/models/google/flan-t5-base",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer YOUR_HF_KEY`,
+          Authorization: `Bearer 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`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          inputs: userMessage
+          inputs: "Answer this: " + userMessage
         })
       }
     );
 
-    const data = await response.json();
+    const text = await response.text();
+    console.log("RAW RESPONSE:", text);
 
-    console.log(data); // 👈 VERY IMPORTANT (to see error in logs)
-
-    if (data.error) {
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
       return res.json({
-        reply: "⏳ Model is loading... try again in 10 seconds"
+        reply: "❌ HuggingFace returned HTML"
       });
     }
 
-    res.json({
+    // If model still loading
+    if (data.error) {
+      return res.json({
+        reply: "⏳ Model loading... try again in 10 seconds"
+      });
+    }
+
+    return res.json({
       reply: data[0]?.generated_text || "No response"
     });
 
