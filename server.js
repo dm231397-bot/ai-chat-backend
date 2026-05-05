@@ -12,15 +12,14 @@ app.post("/chat", async (req, res) => {
     const userMessage = req.body.message;
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-base",
+      "https://api-inference.huggingface.co/models/distilgpt2",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer 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`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          inputs: "Answer this: " + userMessage
+          inputs: userMessage
         })
       }
     );
