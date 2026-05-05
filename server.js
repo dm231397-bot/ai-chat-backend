@@ -7,7 +7,13 @@ app.use(cors());
 app.use(express.json());
 
 // CHAT ROUTE
+app.get("/", (req, res) => {
+  res.send("✅ AI Backend is running!");
+});
+
 app.post("/chat", async (req, res) => {
+  // your AI code
+});
   try {
     const userMessage = req.body.message;
 
